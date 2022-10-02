@@ -1,1 +1,52 @@
-# Проект "Продуктовый помощник"
+# Проект "Продуктовый помощник". FoodGram
+
+
+## Описание
+
+На этом сервисе пользователи могут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
+
+## Установка
+
+Клонировать репозиторий и перейти в него в командной строке:
+```
+git clone https://github.com/Julka3561/foodgram-project-react.git
+```
+
+```
+cd infra
+```
+
+Запустить проект в контейнерах Docker
+
+```
+docker-compose up -d
+```
+Провести миграции: 
+
+```
+docker-compose exec backend python manage.py migrate
+```
+
+Создать суперпользователя:
+
+```
+docker-compose exec bakend python manage.py createsuperuser
+```
+Собрать статику:
+
+```
+docker-compose exec backend python manage.py collectstatic --no-input
+```
+
+## Заполнение базы данными
+
+```
+docker-compose exec backend python manage.py loaddata dump.json 
+```
+## Об авторе
+Юля & Яндекс.Практикум
+
+Copyright (c) 2022, Julia Vasileva
+
+All rights reserved.
+
