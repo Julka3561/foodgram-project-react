@@ -50,33 +50,13 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
         constraints = [
             models.UniqueConstraint(
-                fields=['name', 'measurment_unit'],
-                name='unique_name_measurment_unit'
+                fields=['name', 'measurement_unit'],
+                name='unique_name_measurement_unit'
             )
         ]
 
     def __str__(self):
         return self.name
-
-
-class IngredientRecipe(models.Model):
-    """Model to link recipes and ingredients with addition of `amount` field"""
-    ingredient = models.ForeignKey(Ingredient,
-                                   on_delete=models.CASCADE,
-                                   related_name='ingredients')
-    amount = models.IntegerField(
-        validators=[
-            MinValueValidator(1, 'Количество не может быть меньше 1.'),
-        ],
-        verbose_name='Количество'
-    )
-
-    class Meta:
-        verbose_name = 'Ингредиент в рецепте'
-        verbose_name_plural = 'Ингредиенты в рецепте'
-
-    def __str__(self):
-        return f'{self.ingredient}: {self.amount}'
 
 
 class Recipe(models.Model):
@@ -116,9 +96,11 @@ class Recipe(models.Model):
     )
 
     ingredients = models.ManyToManyField(
-        IngredientRecipe,
+        Ingredient,
+        through='IngredientRecipe',
         verbose_name='Ингредиенты',
         related_name='recipes',
+        blank=False
     )
 
     created = models.DateTimeField(
@@ -181,3 +163,26 @@ class ShoppingCart(models.Model):
             fields=['user', 'recipe'],
             name='unique_user_cart_recipe'
         )
+
+
+class IngredientRecipe(models.Model):
+    """Model to link recipes and ingredients with addition of `amount` field"""
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               related_name='recipe_ingredients',)
+    ingredient = models.ForeignKey(Ingredient,
+                                   on_delete=models.CASCADE,
+                                   related_name='recipe_ingredients')
+    amount = models.IntegerField(
+        validators=[
+            MinValueValidator(1, 'Количество не может быть меньше 1.'),
+        ],
+        verbose_name='Количество'
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиент в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецепте'
+
+    def __str__(self):
+        return f'{self.ingredient}: {self.amount}'

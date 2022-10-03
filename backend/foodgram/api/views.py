@@ -168,7 +168,6 @@ class ShoppingCartViewSet(viewsets.GenericViewSet):
             'ingredient__name', 'ingredient__measurement_unit').annotate(
                 total_amount=Sum('amount'))
         content_list = []
-        print(ingredients)
         for ingredient in ingredients:
             content_list.append(
                 f'{ingredient["ingredient__name"]} '

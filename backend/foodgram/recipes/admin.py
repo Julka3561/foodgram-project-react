@@ -4,7 +4,12 @@ from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
                             ShoppingCart, Tag)
 
 
-
+class IngredienRecipeInline(admin.TabularInline):
+    model = IngredientRecipe
+    fields = ('ingredient', 'amount')
+    search_fields = ('ingredient',)
+    min_num = 1
+    extra = 0
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -17,7 +22,8 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author', 'author__first_name', 'author__email')
     list_filter = ('tags',)
     empty_value_display = '-пусто-'
-    
+    inlines = (IngredienRecipeInline,)
+
     def qty_of_favorites(self, obj):
         return obj.favorite.count()
 
@@ -43,6 +49,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 class IngredientRecipeAdmin(admin.ModelAdmin):
     list_display = ('pk',
+                    'recipe',
                     'ingredient',
                     'amount',
                     'measurement_unit',
@@ -53,6 +60,8 @@ class IngredientRecipeAdmin(admin.ModelAdmin):
     def measurement_unit(self, obj):
         return obj.ingredient.measurement_unit
 
+    measurement_unit.short_description = 'Единицы измерения'
+
 
 class FavoriteAndCartAdmin(admin.ModelAdmin):
     list_display = ('pk',
@@ -60,7 +69,7 @@ class FavoriteAndCartAdmin(admin.ModelAdmin):
                     'recipe',
                     )
     list_editable = ('user', 'recipe',)
-    list_filter = ('user', 'recipe')
+    list_filter = ('user',)
 
 
 admin.site.register(Recipe, RecipeAdmin)
