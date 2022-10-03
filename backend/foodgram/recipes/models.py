@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+
 from users.models import User
 
 
@@ -7,28 +8,23 @@ class Tag(models.Model):
     """Model for recipes tags."""
     name = models.CharField(
         max_length=200,
-        blank=False,
-        null=False,
         verbose_name='Название'
     )
 
     color = models.CharField(
         max_length=7,
-        blank=False,
-        null=False,
         verbose_name='Цвет в HEX'
     )
 
     slug = models.SlugField(
         max_length=200,
         unique=True,
-        blank=False,
         null=True,
         verbose_name='Уникальный слаг'
     )
 
     class Meta:
-        ordering = ["name"]
+        ordering = ['name']
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
@@ -40,29 +36,31 @@ class Ingredient(models.Model):
     """Model for recipes ingredients."""
     name = models.CharField(
         max_length=200,
-        blank=False,
-        null=False,
         verbose_name='Название'
     )
 
     measurement_unit = models.CharField(
         max_length=200,
-        blank=False,
-        null=False,
         verbose_name='Единицы измерения'
     )
 
     class Meta:
-        ordering = ["name"]
+        ordering = ['name']
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurment_unit'],
+                name='unique_name_measurment_unit'
+            )
+        ]
 
     def __str__(self):
         return self.name
 
 
 class IngredientRecipe(models.Model):
-    """Model to link recipes and ingridients with addition of `amount` field"""
+    """Model to link recipes and ingredients with addition of `amount` field"""
     ingredient = models.ForeignKey(Ingredient,
                                    on_delete=models.CASCADE,
                                    related_name='ingredients')
@@ -72,6 +70,10 @@ class IngredientRecipe(models.Model):
         ],
         verbose_name='Количество'
     )
+
+    class Meta:
+        verbose_name = 'Ингредиент в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецепте'
 
     def __str__(self):
         return f'{self.ingredient}: {self.amount}'
@@ -87,19 +89,15 @@ class Recipe(models.Model):
 
     name = models.CharField(
         max_length=200,
-        blank=False,
-        null=False,
         verbose_name='Название'
     )
 
     image = models.ImageField(
         upload_to='recipes/',
         verbose_name='Картинка'
-        )
+    )
 
     text = models.TextField(
-        blank=False,
-        null=False,
         verbose_name='Описание'
     )
 
@@ -129,7 +127,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ["-created"]
+        ordering = ['-created']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
@@ -155,6 +153,10 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'избранное'
         verbose_name_plural = 'избранное'
+        models.UniqueConstraint(
+            fields=['user', 'recipe'],
+            name='unique_user_fav_recipe'
+        )
 
 
 class ShoppingCart(models.Model):
@@ -175,3 +177,7 @@ class ShoppingCart(models.Model):
     class Meta:
         verbose_name = 'список покупок'
         verbose_name_plural = 'списки покупок'
+        models.UniqueConstraint(
+            fields=['user', 'recipe'],
+            name='unique_user_cart_recipe'
+        )

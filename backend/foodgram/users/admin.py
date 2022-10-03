@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from users.models import Subscription, User
 
 
@@ -12,7 +13,7 @@ class UserAdmin(admin.ModelAdmin):
                     'last_login',
                     )
     list_editable = ('is_active',)
-    list_filter = ('username', 'email')
+    search_fields = ('username', 'email')
     empty_value_display = '-пусто-'
 
 

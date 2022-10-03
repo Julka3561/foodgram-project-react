@@ -7,27 +7,21 @@ class User(AbstractUser):
     email = models.EmailField(
         'email',
         max_length=254,
-        blank=False,
-        null=False,
         unique=True,
     )
 
     first_name = models.CharField(
         'имя',
         max_length=150,
-        blank=False,
-        null=False,
     )
 
     last_name = models.CharField(
         'фамилия',
         max_length=150,
-        blank=False,
-        null=False,
     )
 
     class Meta:
-        ordering = ["id"]
+        ordering = ['id']
         verbose_name = 'пользователь'
         verbose_name_plural = 'пользователи'
 

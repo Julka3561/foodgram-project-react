@@ -1,9 +1,11 @@
 import base64
 
 from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from rest_framework import serializers
+
+from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from users.models import User
 
 
@@ -26,7 +28,8 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         if self.context['request'].user.is_authenticated:
-            user = User.objects.get(username=self.context['request'].user)
+            user = get_object_or_404(
+                User, username=self.context['request'].user)
             return user.follower.filter(author=obj.id).exists()
         return False
 
@@ -89,13 +92,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         if self.context['request'].user.is_authenticated:
-            user = User.objects.get(username=self.context['request'].user)
+            user = get_object_or_404(
+                User, username=self.context['request'].user)
             return user.favorite.filter(recipe=obj.id).exists()
         return False
 
     def get_is_in_shopping_cart(self, obj):
         if self.context['request'].user.is_authenticated:
-            user = User.objects.get(username=self.context['request'].user)
+            user = get_object_or_404(
+                User, username=self.context['request'].user)
             return user.cart.filter(recipe=obj.id).exists()
         return False
 
@@ -123,8 +128,8 @@ class RecipeCreateSerializer(RecipeSerializer):
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.add(*tags)
         for ingredient in ingredients:
-            current_ingredient = Ingredient.objects.get(
-                pk=ingredient['ingredient']['id'])
+            current_ingredient = get_object_or_404(
+                Ingredient, pk=ingredient['ingredient']['id'])
             current_amount = ingredient['amount']
             new = IngredientRecipe.objects.create(
                 ingredient=current_ingredient,
@@ -146,8 +151,8 @@ class RecipeCreateSerializer(RecipeSerializer):
         instance.ingredients.clear()
 
         for ingredient in ingredients:
-            current_ingredient = Ingredient.objects.get(
-                pk=ingredient['ingredient']['id'])
+            current_ingredient = get_object_or_404(
+                Ingredient, pk=ingredient['ingredient']['id'])
             current_amount = ingredient['amount']
             update = IngredientRecipe.objects.create(
                 ingredient=current_ingredient,
