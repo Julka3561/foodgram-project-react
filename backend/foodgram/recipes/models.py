@@ -56,7 +56,7 @@ class Ingredient(models.Model):
         ]
 
     def __str__(self):
-        return self.name
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Recipe(models.Model):
@@ -169,10 +169,12 @@ class IngredientRecipe(models.Model):
     """Model to link recipes and ingredients with addition of `amount` field"""
     recipe = models.ForeignKey(Recipe,
                                on_delete=models.CASCADE,
-                               related_name='recipe_ingredients',)
+                               related_name='recipe_ingredients',
+                               verbose_name='Рецепт')
     ingredient = models.ForeignKey(Ingredient,
                                    on_delete=models.CASCADE,
-                                   related_name='recipe_ingredients')
+                                   related_name='recipe_ingredients',
+                                   verbose_name='Ингредиент')
     amount = models.IntegerField(
         validators=[
             MinValueValidator(1, 'Количество не может быть меньше 1.'),

@@ -4,12 +4,12 @@ services:
   db:
     image: postgres:13.0-alpine
     volumes:
-      - /var/lib/postgresql/data/
+      - db_value:/var/lib/postgresql/data/
     env_file:
       - ./.env
 
   backend:
-    image: julka3561/foodgram_backend:v1.0
+    image: julka3561/foodgram_backend:latest
     restart: always
     volumes:
       - static_value:/app/staticfiles/
@@ -36,3 +36,4 @@ services:
 volumes:
   static_value:
   media_value:
+  db_value:

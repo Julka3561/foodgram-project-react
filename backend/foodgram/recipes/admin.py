@@ -7,7 +7,6 @@ from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
 class IngredienRecipeInline(admin.TabularInline):
     model = IngredientRecipe
     fields = ('ingredient', 'amount')
-    search_fields = ('ingredient',)
     min_num = 1
     extra = 0
 
@@ -52,15 +51,9 @@ class IngredientRecipeAdmin(admin.ModelAdmin):
                     'recipe',
                     'ingredient',
                     'amount',
-                    'measurement_unit',
                     )
     list_editable = ('ingredient', 'amount')
     search_fields = ('ingredient',)
-
-    def measurement_unit(self, obj):
-        return obj.ingredient.measurement_unit
-
-    measurement_unit.short_description = 'Единицы измерения'
 
 
 class FavoriteAndCartAdmin(admin.ModelAdmin):

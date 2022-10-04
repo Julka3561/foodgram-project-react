@@ -4,6 +4,7 @@ from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from users.models import User
@@ -38,7 +39,13 @@ class IngredientSerializer(serializers.ModelSerializer):
     """Serializer to work with Ingredient model."""
     class Meta:
         model = Ingredient
-        fields = ('__all__')  # TODO проверки на уникальность из бд
+        fields = ('__all__')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Ingredient.objects.all(),
+                fields=('name', 'measurement_unit'),
+            )
+        ]
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -61,11 +68,12 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
         model = IngredientRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
-    def validate_amount(self, value):  # TODO настроить валидацию по требованию ревьювера
-        if value <= 0:
+    def validate(self, data):
+        print(data['amount'])
+        if data['amount'] <= 0:
             raise serializers.ValidationError(
                 'Количество не может быть меньше 1.')
-        return value
+        return data
 
 
 class Base64ImageField(serializers.ImageField):
@@ -120,13 +128,8 @@ class RecipeCreateSerializer(RecipeSerializer):
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
 
-    def validate_cooking_time(self, value):
-        if value <= 0:
-            raise serializers.ValidationError(
-                'Время приготовления не может быть менее минуты.')
-        return value
-
-    def save_ingredients(self, recipe, ingredients):
+    @staticmethod
+    def save_ingredients(recipe, ingredients):
         ingredients_list = []
         for ingredient in ingredients:
             current_ingredient = ingredient['ingredient']['id']
@@ -136,13 +139,19 @@ class RecipeCreateSerializer(RecipeSerializer):
                     recipe=recipe,
                     ingredient=current_ingredient,
                     amount=current_amount))
-        IngredientRecipe.objects.bulk_create(
-                ingredients_list)
+        IngredientRecipe.objects.bulk_create(ingredients_list)
+
+    def validate(self, data):
+        if data['cooking_time'] <= 0:
+            raise serializers.ValidationError('Время приготовления не может '
+                                              'быть менее минуты.')
+        return data
 
     def create(self, validated_data):
+        author = self.context['request'].user
         ingredients = validated_data.pop('recipe_ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(**validated_data, author=author)
         recipe.tags.add(*tags)
         self.save_ingredients(recipe, ingredients)
         return recipe
