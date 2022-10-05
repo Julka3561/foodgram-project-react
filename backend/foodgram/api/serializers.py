@@ -67,13 +67,11 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount')
-
-    def validate(self, data):
-        print(data['amount'])
-        if data['amount'] <= 0:
-            raise serializers.ValidationError(
-                'Количество не может быть меньше 1.')
-        return data
+        extra_kwargs = {
+            'amount': {
+                'min_value': None,
+            },
+        }
 
 
 class Base64ImageField(serializers.ImageField):
@@ -127,6 +125,11 @@ class RecipeCreateSerializer(RecipeSerializer):
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
+        extra_kwargs = {
+            'cooking_time': {
+                'min_value': None,
+            },
+        }
 
     @staticmethod
     def save_ingredients(recipe, ingredients):
@@ -145,6 +148,17 @@ class RecipeCreateSerializer(RecipeSerializer):
         if data['cooking_time'] <= 0:
             raise serializers.ValidationError('Время приготовления не может '
                                               'быть менее минуты.')
+
+        ingredients_list = []
+        for ingredient in data['recipe_ingredients']:
+            if ingredient['amount'] <= 0:
+                raise serializers.ValidationError('Количество не может'
+                                                  ' быть меньше 1.')
+            ingredients_list.append(ingredient['ingredient']['id'])
+
+        if len(ingredients_list) > len(set(ingredients_list)):
+            raise serializers.ValidationError('Ингредиенты не должны'
+                                              ' повторяться.')
         return data
 
     def create(self, validated_data):
