@@ -1,8 +1,8 @@
 ![foodgram workflow status](https://github.com/julka3561/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
-# Проект "Продуктовый помощник". FoodGram
+# Проект "Продуктовый помощник". FoodGramm
 
-IP-адрес проекта: 158.160.13.103
+Адрес проекта: 158.160.13.103 http://julka3561.sytes.net/
 
 Доступ к админке: admin admin
 
