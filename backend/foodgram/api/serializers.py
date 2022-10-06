@@ -44,6 +44,7 @@ class IngredientSerializer(serializers.ModelSerializer):
             UniqueTogetherValidator(
                 queryset=Ingredient.objects.all(),
                 fields=('name', 'measurement_unit'),
+                message=('Такой ингредиент уже есть базе.')
             )
         ]
 
@@ -89,7 +90,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(read_only=True, many=True)
     ingredients = IngredientRecipeSerializer(many=True,
                                              source='recipe_ingredients')
-    author = CustomUserSerializer(read_only=True)
+    author = CustomUserSerializer(read_only=True,
+                                  default=serializers.CurrentUserDefault())
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -99,12 +101,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Recipe.objects.all(),
-                fields=('author', 'name'),
-            )
-        ]
 
     def get_is_favorited(self, obj):
         if self.context['request'].user.is_authenticated:
@@ -136,6 +132,13 @@ class RecipeCreateSerializer(RecipeSerializer):
                 'min_value': None,
             },
         }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Recipe.objects.all(),
+                fields=('author', 'name'),
+                message='Вы уже создавали рецепт с таким названием.'
+            )
+        ]
 
     @staticmethod
     def save_ingredients(recipe, ingredients):
