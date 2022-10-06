@@ -1,3 +1,5 @@
+https://github.com/julka3561/foodgram-project-react/actions/workflows/main.yml/badge.svg
+
 # Проект "Продуктовый помощник". FoodGram
 
 IP-адрес проекта: 158.160.13.103
